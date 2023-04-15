@@ -6,12 +6,12 @@ import fire
 import uuid
 from pathlib import Path
 
-DBMS = ["sqlite", "mysql", "mariadb", "postgresql"]
+DBMS = ["sqlite", "mysql", "mariadb", "oceanbase", "postgresql"]
 ROOTPATH = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent
 
 
 def get_mutator_so_path(database):
-  if database == "mariadb":
+  if database == "mariadb" or database == "oceanbase":
     database = "mysql"
   return f"{ROOTPATH}/build/lib{database}_mutator.so"
 
