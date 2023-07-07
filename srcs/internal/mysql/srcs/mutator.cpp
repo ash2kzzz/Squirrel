@@ -1276,10 +1276,6 @@ vector<IR *> Mutator::mutate2(IR *input) {
   kStringLiteral, kIdentifier, kWindowName, kTriggerName, kConstraintName,
   kViewName, kName
   */
-
-  /*
-  kTableRef, kAlterAction, kTableConstraint
-  */
   vector<IR *> res;
 
   if (!lucky_enough_to_be_mutated(input->mutated_times_)) {
@@ -1487,22 +1483,26 @@ vector<IR *> Mutator::mutate2(IR *input) {
             tmp->type_ = kUnknown;
             tmp->op_->middle_ = "BETWEEN";
             tmp->op_->suffix_ = "AND";
-            res.push_back(new IR(kOptFrameClause, OP3("", "", ""), tmp, deep_copy(frame_bound_end_node)));
+            tmp = new IR(input, tmp, deep_copy(frame_bound_end_node));
+            res.push_back(tmp);
           }
         } else {
           auto range_or_rows_node = input->left_->left_;
           auto frame_bound_start_node = input->left_->right_;
-          res.push_back(new IR(kOptFrameClause, OP3("", "", ""), deep_copy(range_or_rows_node), deep_copy(frame_bound_start_node)));
+          auto tmp = new IR(input, deep_copy(range_or_rows_node), deep_copy(frame_bound_start_node));
+          res.push_back(tmp);
         }
       } else {
         auto range_or_rows_node = get_ir_from_library(kRangeOrRows);
         auto frame_bound_start_node = get_ir_from_library(kFrameBoundStart);
         auto frame_bound_end_node = get_ir_from_library(kFrameBoundEnd);
         if (range_or_rows_node != empty_ir && frame_bound_start_node != empty_ir) {
-          res.push_back(new IR(kOptFrameClause, OP3("", "", ""), deep_copy(range_or_rows_node), deep_copy(frame_bound_start_node)));
+          auto tmp = new IR(kOptFrameClause, OP3("", "", ""), deep_copy(range_or_rows_node), deep_copy(frame_bound_start_node));
+          res.push_back(tmp);
           if (frame_bound_end_node != empty_ir) {
             auto tmp = new IR(kUnknown, OP3("", "BETWEEN", "AND"), deep_copy(get_ir_from_library(kRangeOrRows)), deep_copy(get_ir_from_library(kFrameBoundStart)));
-            res.push_back(new IR(kOptFrameClause, OP3("", "", ""), tmp, deep_copy(frame_bound_end_node)));
+            tmp = new IR(kOptFrameClause, OP3("", "", ""), tmp, deep_copy(frame_bound_end_node));
+            res.push_back(tmp);
           }
         }
       }
@@ -1541,7 +1541,9 @@ vector<IR *> Mutator::mutate2(IR *input) {
       else {
         auto frame_bound_node = get_ir_from_library(kFrameBound);
         if (frame_bound_node != empty_ir) {
-          auto tmp = new IR(kFrameBoundStart, OP3("", "", ""), deep_copy(frame_bound_node));
+          auto tmp = new IR(input, deep_copy(frame_bound_node), NULL);
+          tmp->op_->prefix_ = "";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
         }
       }
@@ -1557,7 +1559,9 @@ vector<IR *> Mutator::mutate2(IR *input) {
       else {
         auto frame_bound_node = get_ir_from_library(kFrameBound);
         if (frame_bound_node != empty_ir) {
-          auto tmp = new IR(kFrameBoundEnd, OP3("", "", ""), deep_copy(frame_bound_node));
+          auto tmp = new IR(input, deep_copy(frame_bound_node), NULL);
+          tmp->op_->prefix_ = "";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
         }
       }
@@ -1584,8 +1588,10 @@ vector<IR *> Mutator::mutate2(IR *input) {
       } else {
         auto expr_node = get_ir_from_library(kExpr);
         if (expr_node != empty_ir) {
-          res.push_back(new IR(kFrameBound, OP3("", "PRECEDING", ""), deep_copy(expr_node)));
-          res.push_back(new IR(kFrameBound, OP3("", "FOLLOWING", ""), deep_copy(get_ir_from_library(kExpr))));
+          auto tmp = new IR(kFrameBound, OP3("", "PRECEDING", ""), deep_copy(expr_node));
+          res.push_back(tmp);
+          tmp = new IR(kFrameBound, OP3("", "FOLLOWING", ""), deep_copy(get_ir_from_library(kExpr)));
+          res.push_back(tmp);
         }
       }
       break;
@@ -1680,6 +1686,105 @@ vector<IR *> Mutator::mutate2(IR *input) {
       opt_table_prefix OP_LP select_no_parens OP_RP opt_as_alias opt_on opt_using
       opt_table_prefix OP_LP table_ref OP_RP opt_as_alias opt_on opt_using
       */
+      if (input->left_->left_->right_->type_ == kOptIndex) {
+        auto opt_table_prefix_node = input->left_->left_->left_->left_->left_;
+        auto opt_as_alias_node = input->left_->left_->left_->right_;
+        auto opt_on_node = input->left_->right_;
+        auto opt_using_node = input->right_;
+        auto function_name_node = get_ir_from_library(kFunctionName);
+        auto expr_list_node = get_ir_from_library(kExprList);
+        if (function_name_node != empty_ir && expr_list_node != empty_ir) {
+          auto tmp = new IR(kUnknown, OP3("", "", "("), deep_copy(opt_table_prefix_node), deep_copy(function_name_node));
+          tmp = new IR(kUnknown, OP3("", "", ")"), tmp, deep_copy(expr_list_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+          tmp = new IR(input, tmp, deep_copy(opt_using_node));
+          res.push_back(tmp);
+        }
+        auto select_no_parens_node = get_ir_from_library(kSelectNoParens);
+        if (select_no_parens_node != empty_ir) {
+          auto tmp = new IR(kUnknown, OP3("", "(", ")"), deep_copy(opt_table_prefix_node), deep_copy(select_no_parens_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+          tmp = new IR(input, tmp, deep_copy(opt_using_node));
+          res.push_back(tmp);
+        }
+        auto table_ref_node = get_ir_from_library(kTableRef);
+        if (table_ref_node != empty_ir) {
+          auto tmp = new IR(kUnknown, OP3("", "(", ")"), deep_copy(opt_table_prefix_node), deep_copy(table_ref_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+          tmp = new IR(input, tmp, deep_copy(opt_using_node));
+          res.push_back(tmp);
+        }
+      }
+      if (input->left_->left_->right_->type_ == kOptAsAlias) {
+        auto opt_as_alias_node = input->left_->left_->right_;
+        auto opt_on_node = input->left_->right_;
+        auto opt_using_node = input->right_;
+        IR* opt_table_prefix_node;
+        if (input->left_->left_->left_->right_->type_ == kExprList) {
+          opt_table_prefix_node = input->left_->left_->left_->left_->left_;
+        } else {
+          opt_table_prefix_node = input->left_->left_->left_->left_;
+        }
+        auto table_name_node = get_ir_from_library(kTableName);
+        auto opt_index_node = get_ir_from_library(kOptIndex);
+        if (table_name_node != empty_ir && opt_index_node != empty_ir) {
+          auto tmp = new IR(kUnknown, OP3("", "", ""), deep_copy(opt_table_prefix_node), deep_copy(table_name_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_index_node));
+          tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+          tmp = new IR(input, tmp, deep_copy(opt_using_node));
+          res.push_back(tmp);
+        }
+        if (input->left_->left_->left_->right_->type_ == kExprList) {
+          auto select_no_parens_node = get_ir_from_library(kSelectNoParens);
+          if (select_no_parens_node != empty_ir) {
+            auto tmp = new IR(kUnknown, OP3("", "(", ")"), deep_copy(opt_table_prefix_node), deep_copy(select_no_parens_node));
+            tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+            tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+            tmp = new IR(input, tmp, deep_copy(opt_using_node));
+            res.push_back(tmp);
+          }
+          auto table_ref_node = get_ir_from_library(kTableRef);
+          if (table_ref_node != empty_ir) {
+            auto tmp = new IR(kUnknown, OP3("", "(", ")"), deep_copy(opt_table_prefix_node), deep_copy(table_ref_node));
+            tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+            tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+            tmp = new IR(input, tmp, deep_copy(opt_using_node));
+            res.push_back(tmp);
+          }
+        } else {
+          auto function_name_node = get_ir_from_library(kFunctionName);
+          auto expr_list_node = get_ir_from_library(kExprList);
+          if (function_name_node != empty_ir && expr_list_node != empty_ir) {
+            auto tmp = new IR(kUnknown, OP3("", "", "("), deep_copy(opt_table_prefix_node), deep_copy(function_name_node));
+            tmp = new IR(kUnknown, OP3("", "", ")"), tmp, deep_copy(expr_list_node));
+            tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_as_alias_node));
+            tmp = new IR(kUnknown, OP3("", "", ""), tmp, deep_copy(opt_on_node));
+            tmp = new IR(input, tmp, deep_copy(opt_using_node));
+            res.push_back(tmp);
+          }
+          if (input->left_->left_->left_->right_->type_ != kSelectNoParens) {
+            auto select_no_parens_node = get_ir_from_library(kSelectNoParens);
+            if (select_no_parens_node != empty_ir) {
+              auto copy = deep_copy(input);
+              deep_delete(copy->left_->left_->left_->right_);
+              copy->left_->left_->left_->right_ = deep_copy(select_no_parens_node);
+              res.push_back(copy);
+            }
+          } else {
+            auto table_ref_node = get_ir_from_library(kTableRef);
+            if (table_ref_node != empty_ir) {
+              auto copy = deep_copy(input);
+              deep_delete(copy->left_->left_->left_->right_);
+              copy->left_->left_->left_->right_ = deep_copy(table_ref_node);
+              res.push_back(copy);
+            }
+          }
+        }
+      }
       break;
     }
     case kOptIndex: {
@@ -1694,7 +1799,8 @@ vector<IR *> Mutator::mutate2(IR *input) {
       } else {
         auto column_name_node = get_ir_from_library(kColumnName);
         if (column_name_node != empty_ir) {
-          res.push_back(new IR(kOptIndex, OP3("INDEXED BY", "", ""), deep_copy(column_name_node)));
+          auto tmp = new IR(kOptIndex, OP3("INDEXED BY", "", ""), deep_copy(column_name_node));
+          res.push_back(tmp);
         }
         if (input->op_ != NULL)
           res.push_back(new IR(kOptIndex, string("")));
@@ -1713,7 +1819,8 @@ vector<IR *> Mutator::mutate2(IR *input) {
       else {
         auto expr_node = get_ir_from_library(kExpr);
         if (expr_node != empty_ir) {
-          res.push_back(new IR(kOptOn, OP3("ON", "", ""), deep_copy(expr_node)));
+          auto tmp = new IR(kOptOn, OP3("ON", "", ""), deep_copy(expr_node));
+          res.push_back(tmp);
         }
       }
       break;
@@ -1860,7 +1967,7 @@ vector<IR *> Mutator::mutate2(IR *input) {
           auto copy = deep_copy(input);
           copy->type_ = kUnknown;
           copy->op_->suffix_ = ",";
-          auto tmp = new IR(kExprList, OP3("", "", ""), copy, deep_copy(expr_list_node));
+          auto tmp = new IR(input, copy, deep_copy(expr_list_node));
           res.push_back(tmp);
         }
       }
@@ -2058,8 +2165,10 @@ vector<IR *> Mutator::mutate2(IR *input) {
       } else {
         auto cte_table_list_node = get_ir_from_library(kCteTableList);
         if (cte_table_list_node != empty_ir) {
-          res.push_back(new IR(kOptWithClause, OP3("WITH", "", ""), deep_copy(cte_table_list_node)));
-          res.push_back(new IR(kOptWithClause, OP3("WITH RECURSIVE", "", ""), deep_copy(get_ir_from_library(kCteTableList))));
+          auto tmp = new IR(kOptWithClause, OP3("WITH", "", ""), deep_copy(cte_table_list_node));
+          res.push_back(tmp);
+          tmp = new IR(kOptWithClause, OP3("WITH RECURSIVE", "", ""), deep_copy(get_ir_from_library(kCteTableList)));
+          res.push_back(tmp);
         }
       }
       break;
@@ -2157,8 +2266,7 @@ vector<IR *> Mutator::mutate2(IR *input) {
           res.push_back(tmp);
         }
       } else {
-        auto table_option_node_with_copy = deep_copy(input->left_->left_);
-        auto tmp = new IR(input, table_option_node_with_copy, NULL);
+        auto tmp = new IR(input, deep_copy(input->left_->left_), NULL);
         tmp->operand_num_ = 1;
         res.push_back(tmp);
       }
@@ -2606,7 +2714,8 @@ vector<IR *> Mutator::mutate2(IR *input) {
             tmp->type_ = kUnknown;
             tmp->op_->middle_ = "DO UPDATE";
             tmp->operand_num_ = 2;
-            res.push_back(new IR(kOptOnConflict, OP3("", "", ""), tmp, deep_copy(where_clause_node)));
+            tmp = new IR(kOptOnConflict, OP3("", "", ""), tmp, deep_copy(where_clause_node));
+            res.push_back(tmp);
           }
         } else {
           auto copy = deep_copy(input->left_);
@@ -2626,7 +2735,8 @@ vector<IR *> Mutator::mutate2(IR *input) {
           res.push_back(tmp);
           if (set_clause_list_node != empty_ir && where_clause_node != empty_ir) {
             tmp = new IR(kUnknown, OP3("ON CONFLICT", "DO UPDATE", ""), deep_copy(get_ir_from_library(kOptConflictExpr)), deep_copy(set_clause_list_node));
-            res.push_back(new IR(kOptOnConflict, OP3("", "", ""), tmp, deep_copy(where_clause_node)));
+            tmp = new IR(kOptOnConflict, OP3("", "", ""), tmp, deep_copy(where_clause_node));
+            res.push_back(tmp);
           }
         }
       }
@@ -2685,6 +2795,117 @@ vector<IR *> Mutator::mutate2(IR *input) {
       DROP opt_column column_name
       alter_constant_action
       */
+      if (input->left_->type_ != kTableName) {
+        auto table_name_node = get_ir_from_library(kTableName);
+        if (table_name_node != empty_ir) {
+          auto tmp = new IR(input, deep_copy(table_name_node), NULL);
+          tmp->op_->prefix_ = "RENAME TO";
+          tmp->operand_num_ = 1;
+          res.push_back(tmp);
+        }
+      }
+      if (input->left_->type_ != kUnknown) {
+        IR* opt_column_node, *column_name_1_node, *column_name_2_node;
+        if (input->left_->type_ == kOptColumn) {
+          opt_column_node = input->left_;
+        } else {
+          opt_column_node = get_ir_from_library(kOptColumn);
+        }
+        if (input->right_ != NULL && input->right_->type_ == kColumnName) {
+          column_name_1_node = input->right_;
+        } else {
+          column_name_1_node = get_ir_from_library(kColumnName);
+        }
+        column_name_2_node = get_ir_from_library(kColumnName);
+        if (opt_column_node != empty_ir && column_name_2_node != empty_ir) {
+          auto tmp = new IR(kUnknown, OP3("RENAME", "", "TO"), deep_copy(opt_column_node), deep_copy(column_name_1_node));
+          tmp = new IR(input, tmp, deep_copy(column_name_2_node));
+          tmp->op_->prefix_ = "";
+          tmp->operand_num_ = 2;
+          res.push_back(tmp);
+        }
+      }
+      if (input->op_->prefix_ != "ADD") {
+        IR* opt_column_node, *column_def_node;
+        if (input->left_->type_ == kOptColumn) {
+          opt_column_node = input->left_;
+        } else if (input->left_->type_ == kUnknown) {
+          opt_column_node = input->left_->left_;
+        } else {
+          opt_column_node = get_ir_from_library(kOptColumn);
+        }
+        column_def_node = get_ir_from_library(kColumnDef);
+        if (opt_column_node != empty_ir && column_def_node != empty_ir) {
+          auto tmp = new IR(input, deep_copy(opt_column_node), deep_copy(column_def_node));
+          tmp->op_->prefix_ = "ADD";
+          tmp->operand_num_ = 2;
+          res.push_back(tmp);
+        }
+      }
+      if (input->op_->prefix_ != "DROP") {
+        IR* opt_column_node, *column_name_node;
+        if (input->left_->type_ == kOptColumn) {
+          opt_column_node = input->left_;
+          column_name_node = get_ir_from_library(kColumnName);
+        } else if (input->left_->type_ == kUnknown) {
+          opt_column_node = input->left_->left_;
+          column_name_node = input->left_->right_;
+        } else {
+          opt_column_node = get_ir_from_library(kOptColumn);
+          column_name_node = get_ir_from_library(kColumnName);
+        }
+        if (opt_column_node != empty_ir && column_name_node != empty_ir) {
+          auto tmp = new IR(input, deep_copy(opt_column_node), deep_copy(column_name_node));
+          tmp->op_->prefix_ = "DROP";
+          tmp->operand_num_ = 2;
+          res.push_back(tmp);
+        }
+      }
+      if (input->left_->type_ != kAlterConstantAction) {
+        auto alter_constant_action_node = get_ir_from_library(kAlterConstantAction);
+        if (alter_constant_action_node != empty_ir) {
+          auto tmp = new IR(input, deep_copy(alter_constant_action_node), NULL);
+          tmp->op_->prefix_ = "";
+          tmp->operand_num_ = 1;
+          res.push_back(tmp);
+        }
+      }
+      for (auto node : res) {
+        if (node->left_->type_ != kTableName)
+          continue;
+        auto identifier_node = node->left_->left_;
+        identifier_node->data_type_ = kDataTableName;
+        identifier_node->scope_ = 2;
+        identifier_node->data_flag_ = kReplace;
+      }
+      for (auto node : res) {
+        if (node->left_->type_ != kUnknown)
+          continue;
+        auto identifier_1_node = node->left_->right_->left_;
+        auto identifier_2_node = node->right_->left_;
+        identifier_1_node->data_type_ = kDataColumnName;
+        identifier_1_node->scope_ = 2;
+        identifier_1_node->data_flag_ = kUse;
+        identifier_2_node->data_type_ = kDataColumnName;
+        identifier_2_node->scope_ = 3;
+        identifier_2_node->data_flag_ = kReplace;
+      }
+      for (auto node : res) {
+        if (node->right_->type_ != kColumnDef)
+          continue;
+        auto identifier_node = node->right_->left_->left_;
+        identifier_node->data_type_ = kDataColumnName;
+        identifier_node->scope_ = 2;
+        identifier_node->data_flag_ = kDefine;
+      }
+      for (auto node : res) {
+        if (node->op_->prefix_ != "DROP")
+          continue;
+        auto identifier_node = node->right_->left_;
+        identifier_node->data_type_ = kDataColumnName;
+        identifier_node->scope_ = 2;
+        identifier_node->data_flag_ = kUndefine;
+      }
       break;
     }
     case kAlterConstantAction: {
@@ -3481,15 +3702,25 @@ vector<IR *> Mutator::mutate2(IR *input) {
 
         auto operand_node = get_ir_from_library(kOperand);
         if (operand_node != empty_ir) {
-          auto tmp = new IR(kUnaryExpr, OP3("-", "", ""), deep_copy(operand_node));
+          auto tmp = new IR(input, deep_copy(operand_node), NULL);
+          tmp->op_->prefix_ = "-";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
-          tmp = new IR(kUnaryExpr, OP3("NOT", "", ""), deep_copy(get_ir_from_library(kOperand)));
+          tmp = new IR(input, deep_copy(get_ir_from_library(kOperand)), NULL);
+          tmp->op_->prefix_ = "NOT";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
-          tmp = new IR(kUnaryExpr, OP3("", "ISNULL", ""), deep_copy(get_ir_from_library(kOperand)));
+          tmp = new IR(input, deep_copy(get_ir_from_library(kOperand)), NULL);
+          tmp->op_->prefix_ = "ISNULL";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
-          tmp = new IR(kUnaryExpr, OP3("", "IS NULL", ""), deep_copy(get_ir_from_library(kOperand)));
+          tmp = new IR(input, deep_copy(get_ir_from_library(kOperand)), NULL);
+          tmp->op_->prefix_ = "IS NULL";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
-          tmp = new IR(kUnaryExpr, OP3("", "IS NOT NULL", ""), deep_copy(get_ir_from_library(kOperand)));
+          tmp = new IR(input, deep_copy(get_ir_from_library(kOperand)), NULL);
+          tmp->op_->prefix_ = "IS NOT NULL";
+          tmp->operand_num_ = 1;
           res.push_back(tmp);
         }
       }
@@ -4517,19 +4748,7 @@ vector<IR *> Mutator::mutate2(IR *input) {
           copy = deep_copy(input);
           copy->type_ = kUnknown;
           copy->op_->middle_ = "FOREIGN KEY (";
-          auto reference_clause_node_with_copy = deep_copy(reference_clause_node);
-          auto opt_column_name_list_node = reference_clause_node_with_copy->left_->left_->right_;
-          if (opt_column_name_list_node->left_ != NULL) {
-            auto column_name_list_node = opt_column_name_list_node->left_;
-            while (column_name_list_node) {
-              auto identifier_node = column_name_list_node->left_->left_;
-              identifier_node->data_type_ = kDataColumnName;
-              identifier_node->scope_ = 2;
-              identifier_node->data_flag_ = kUse;
-              column_name_list_node = column_name_list_node->right_;
-            }
-          }
-          auto tmp = new IR(kTableConstraint, OP3("", "", ""), copy, reference_clause_node_with_copy);
+          auto tmp = new IR(kTableConstraint, OP3("", "", ""), copy, deep_copy(reference_clause_node));
           res.push_back(tmp);
         }
         auto expr_node = get_ir_from_library(kExpr);
@@ -4550,19 +4769,7 @@ vector<IR *> Mutator::mutate2(IR *input) {
           copy = deep_copy(input);
           copy->type_ = kUnknown;
           copy->op_->middle_ = "FOREIGN KEY (";
-          auto reference_clause_node_with_copy = deep_copy(reference_clause_node);
-          auto opt_column_name_list_node = reference_clause_node_with_copy->left_->left_->right_;
-          if (opt_column_name_list_node->left_ != NULL) {
-            auto column_name_list_node = opt_column_name_list_node->left_;
-            while (column_name_list_node) {
-              auto identifier_node = column_name_list_node->left_->left_;
-              identifier_node->data_type_ = kDataColumnName;
-              identifier_node->scope_ = 2;
-              identifier_node->data_flag_ = kUse;
-              column_name_list_node = column_name_list_node->right_;
-            }
-          }
-          auto tmp = new IR(kTableConstraint, OP3("", "", ""), copy, reference_clause_node_with_copy);
+          auto tmp = new IR(kTableConstraint, OP3("", "", ""), copy, deep_copy(reference_clause_node));
           res.push_back(tmp);
         }
         auto expr_node = get_ir_from_library(kExpr);
@@ -4572,6 +4779,57 @@ vector<IR *> Mutator::mutate2(IR *input) {
           auto tmp = new IR(kUnknown, OP3("", "CHECK (", ")"), deep_copy(constraint_name_node), deep_copy(expr_node));
           tmp = new IR(kTableConstraint, OP3("", "", ""), tmp, deep_copy(opt_enforced_node));
           res.push_back(tmp);
+        }
+      }
+      if (input->op_->middle_ == "") {
+        auto constraint_name_node = input->left_->left_;
+        auto indexed_column_list_node = get_ir_from_library(kIndexedColumnList);
+        if (indexed_column_list_node != empty_ir) {
+          auto tmp = new IR(input, deep_copy(constraint_name_node), deep_copy(indexed_column_list_node));
+          tmp->op_->middle_ = "PRIMARY KEY (";
+          tmp->op_->suffix_ = ")";
+          res.push_back(tmp);
+          tmp = new IR(input, deep_copy(constraint_name_node), deep_copy(get_ir_from_library(kIndexedColumnList)));
+          tmp->op_->middle_ = "UNIQUE (";
+          tmp->op_->suffix_ = ")";
+          res.push_back(tmp);
+        }
+        if (input->left_->op_->middle_ == "CHECK (") {
+          auto column_name_list_node = get_ir_from_library(kColumnNameList);
+          auto reference_clause_node = get_ir_from_library(kReferenceClause);
+          if (column_name_list_node != empty_ir && reference_clause_node != empty_ir) {
+            auto copy = deep_copy(input);
+            deep_delete(copy->left_->right_);
+            copy->left_->right_ = deep_copy(column_name_list_node);
+            deep_delete(copy->right_);
+            copy->right_ = deep_copy(reference_clause_node);
+            copy->left_->op_->middle_ = "FOREIGN KEY (";
+            res.push_back(copy);
+          }
+        } else { // input->left_->op_->middle_ == "FOREIGN KEY ("
+          auto expr_node = get_ir_from_library(kExpr);
+          auto opt_enforced_node = get_ir_from_library(kOptEnforced);
+          if (expr_node != empty_ir && opt_enforced_node != empty_ir) {
+            auto copy = deep_copy(input);
+            deep_delete(copy->left_->right_);
+            copy->left_->right_ = deep_copy(expr_node);
+            deep_delete(copy->right_);
+            copy->right_ = deep_copy(opt_enforced_node);
+            copy->left_->op_->middle_ = "CHECK (";
+            res.push_back(copy);
+          }
+        }
+      }
+      for (auto node : res) {
+        if (node->right_->type_ != kReferenceClause)
+          continue;
+        auto column_name_list_node = node->left_->right_;
+        while (column_name_list_node) {
+          auto identifier_node = column_name_list_node->left_->left_;
+          identifier_node->data_type_ = kDataColumnName;
+          identifier_node->scope_ = 2;
+          identifier_node->data_flag_ = kUse;
+          column_name_list_node = column_name_list_node->right_;
         }
       }
       break;
