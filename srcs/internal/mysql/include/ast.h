@@ -593,26 +593,26 @@ class IR {
     unsigned long long_val_;
     double float_val_;
     bool bool_val_;
-  };
+  }; // value for number
 
-  int scope_;
-  DATAFLAG data_flag_;
-  DATATYPE data_type_;
-  IRTYPE type_;
-  string name_;
+  int scope_; // 数据类型的二级分类
+  DATAFLAG data_flag_; // 数据的上下文
+  DATATYPE data_type_; // 数据类型
+  IRTYPE type_; // IR节点类型
+  string name_; //
 
-  string str_val_;
+  string str_val_; // value for string
   // int int_val_ = 0xdeadbeef;
   // double float_val_ = 1.234;
 
-  IROperator* op_;
-  IR* left_;
-  IR* right_;
-  int operand_num_;
-  unsigned int mutated_times_ = 0;
+  IROperator* op_; // 记录IR节点中前中后的终结符
+  IR* left_; // 左子节点
+  IR* right_; // 右子节点
+  int operand_num_; //
+  unsigned int mutated_times_ = 0; // 变异次数
 
-  string to_string();
-  string to_string_core();
+  string to_string(); //把IR树转化为SQL语句
+  string to_string_core(); //to_string辅助函数
 };
 
 class Node {

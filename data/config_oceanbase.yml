@@ -1,13 +1,13 @@
 ---
 required: ["init_lib", "data_lib", "db", "passwd", "user_name", "host", "sock_path", "db_prefix", "startup_cmd"]
 should_exist: ["init_lib", "data_lib"]
-init_lib: /home/ob-squirrel/squirrel/data/fuzz_root/mysql_init_lib
-data_lib: /home/ob-squirrel/squirrel/data/fuzz_root/global_data_lib_mysql
+init_lib: /root/Squirrel/data/fuzz_root/mysql_init_lib
+data_lib: /root/Squirrel/data/fuzz_root/global_data_lib_mysql
 db: mysql
 passwd: ''
 user_name: root
 host: localhost
-sock_path: /home/ob-squirrel/run/mysql.sock
+sock_path: /root/fuzz_root/run/mysql.sock
 db_prefix: test
 # It is important that the command should run on background
-startup_cmd: "/home/ob-cluster/ob-squirrel/bin/observer -r 127.0.0.1:2882:2881 -p 2881 -P 2882 -z zone1 -n obcluster -c 1 -d /home/ob-cluster/ob-squirrel/store -i lo -l DEBUG -o __min_full_resource_pool_memory=2147483648,memory_limit=64G,system_memory=32G,stack_size=16M,cpu_count=32,cache_wash_threshold=1G,workers_per_cpu_quota=10,schema_history_expire_time=1d,net_thread_count=4,sys_bkgd_migration_retry_num=3,minor_freeze_times=10,enable_separate_sys_clog=0,enable_merge_by_turn=False,datafile_size=64G,enable_syslog_wf=False,enable_syslog_recycle=True,max_syslog_file_count=4,ob_query_timeout=250000"
+startup_cmd: "obd cluster restart Squirrel"

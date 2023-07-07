@@ -35,6 +35,11 @@ class Mutator {
   IR *strategy_replace(IR *cur);                                // done
   bool lucky_enough_to_be_mutated(unsigned int mutated_times);  // done
 
+  vector<IR *> mutate2(IR *input);
+  vector<IR *> strategy_replace_left(IR *cur);
+  vector<IR *> strategy_replace_right(IR *cur);
+  vector<IR *> strategy_replace_left_with_kUnknown(IR *cur);
+
   bool replace(IR *root, IR *old_ir, IR *new_ir);  // done
   IR *locate_parent(IR *root, IR *old_ir);         // done
 

@@ -1,5 +1,35 @@
 {
   "clang-format.fallbackStyle": "Google",
   "editor.formatOnSave": false,
-  "editor.formatOnPaste": false
+  "editor.formatOnPaste": false,
+  "files.associations": {
+    "array": "cpp",
+    "chrono": "cpp",
+    "compare": "cpp",
+    "functional": "cpp",
+    "ratio": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "__functional_base": "cpp",
+    "__functional_base_03": "cpp",
+    "__hash_table": "cpp",
+    "__tuple": "cpp",
+    "algorithm": "cpp",
+    "limits": "cpp",
+    "memory": "cpp",
+    "random": "cpp",
+    "span": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "ranges": "cpp",
+    "*.tcc": "cpp",
+    "string": "cpp",
+    "string_view": "cpp",
+    "__bit_reference": "cpp",
+    "__string": "cpp",
+    "deque": "cpp",
+    "filesystem": "cpp",
+    "future": "cpp"
+  }
 }
