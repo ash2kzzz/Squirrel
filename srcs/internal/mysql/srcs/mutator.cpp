@@ -56,7 +56,8 @@ vector<IR *> Mutator::mutate_all(vector<IR *> &v_ir_collector) {
     if (not_mutatable_types_.find(ir->type_) != not_mutatable_types_.end())
       continue;
 
-    vector<IR *> v_mutated_ir = mutate(ir);
+    // vector<IR *> v_mutated_ir = mutate(ir);
+    vector<IR *> v_mutated_ir = mutate2(ir);
 
     for (auto i : v_mutated_ir) {
       IR *new_ir_tree = deep_copy_with_record(root, ir);
