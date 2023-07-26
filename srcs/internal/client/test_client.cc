@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
   cal[client::kSemanticError] = 0;
   while (std::getline(input, line)) {
     sq->database->mutate(line);
-    if (sq->database->validated_test_cases_.size() >= TEST_NUM) {
-      test_num = sq->database->validated_test_cases_.size();
+    if (sq->database->validated_test_cases_num() >= TEST_NUM) {
+      test_num = sq->database->validated_test_cases_num();
       break;
     }
   }

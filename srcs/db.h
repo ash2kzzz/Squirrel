@@ -15,6 +15,7 @@ class DataBase {
   virtual bool save_interesting_query(const std::string &) = 0;
   // Clean up the enviroment, e.g., drop all the databases.
   virtual bool clean_up() { return true; }
+  virtual size_t validated_test_cases_num() = 0;
   virtual ~DataBase(){};
 };
 

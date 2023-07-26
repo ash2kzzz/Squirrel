@@ -107,14 +107,9 @@ if(MYSQL OR POSTGRESQL)
   target_link_libraries(db_driver ${YAML_CPP_LIBRARIES} all_client
                         absl::strings absl::str_format)
 
-  add_executable(test_client srcs/internal/client/test_client.cc)
-  if(MYSQL)
-    target_link_libraries(test_client all_client ${YAML_CPP_LIBRARIES} mysql_impl config_validator)
-    target_include_directories(test_client PUBLIC srcs/internal/client srcs/internal/mysql srcs)
-  else()
-    target_link_libraries(test_client all_client ${YAML_CPP_LIBRARIES})
-    target_include_directories(test_client PUBLIC srcs/internal/client)
-  endif()
+  add_executable(test_client srcs/internal/client/test_client.cc srcs/db_factory.cc)
+  target_link_libraries(test_client all_client ${YAML_CPP_LIBRARIES} mysql_impl config_validator)
+  target_include_directories(test_client PUBLIC srcs/internal/client srcs/internal/mysql srcs)
 
   add_library(all_client SHARED srcs/internal/client/client.cc)
   target_include_directories(all_client PUBLIC srcs/internal/client)

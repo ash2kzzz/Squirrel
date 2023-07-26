@@ -20,6 +20,7 @@ class MySQLDB : public DataBase {
   virtual bool has_mutated_test_cases();
   // Clean up the enviroment, e.g., drop all the databases.
   virtual bool clean_up() { return true; }
+  virtual size_t validated_test_cases_num() { return this->validated_test_cases_.size(); }
 
  private:
   size_t validate_all(std::vector<IR *> &ir_set);
