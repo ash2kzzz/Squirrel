@@ -110,6 +110,7 @@ if(MYSQL OR POSTGRESQL)
   add_executable(test_client srcs/internal/client/test_client.cc srcs/db_factory.cc)
   target_link_libraries(test_client all_client ${YAML_CPP_LIBRARIES} mysql_impl config_validator)
   target_include_directories(test_client PUBLIC srcs/internal/client srcs/internal/mysql srcs)
+  target_compile_definitions(test_client PRIVATE ${CLIENT_DEFINITION})
 
   add_library(all_client SHARED srcs/internal/client/client.cc)
   target_include_directories(all_client PUBLIC srcs/internal/client)
