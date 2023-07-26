@@ -11,13 +11,6 @@
 #include "env.h"
 #include "yaml-cpp/yaml.h"
 
-struct SquirrelMutator {
-  SquirrelMutator(DataBase *db) : database(db) {}
-  ~SquirrelMutator() { delete database; }
-  DataBase *database;
-  std::string current_input;
-};
-
 extern "C" {
 
 void *afl_custom_init(afl_state_t *afl, unsigned int seed) {

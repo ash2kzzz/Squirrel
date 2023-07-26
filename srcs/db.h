@@ -19,4 +19,14 @@ class DataBase {
 };
 
 DataBase *create_database(YAML::Node config);
+
+
+struct SquirrelMutator {
+  SquirrelMutator(DataBase *db) : database(db) {}
+  ~SquirrelMutator() { delete database; }
+  DataBase *database;
+  std::string current_input;
+};
+
+
 #endif  // __DB_H__

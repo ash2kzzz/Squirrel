@@ -30,6 +30,8 @@
     "__string": "cpp",
     "deque": "cpp",
     "filesystem": "cpp",
-    "future": "cpp"
+    "future": "cpp",
+    "new": "cpp",
+    "iosfwd": "cpp"
   }
 }
