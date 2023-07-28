@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
     test_client->prepare_env();
     client::ExecutionStatus result = test_client->execute(query, strlen(query));
     cal[result]++;
+    test_client->clean_up_env();
   }
 
   std::cout << "test num:" << test_num << "\n";
