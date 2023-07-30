@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <ofstream>
+#include <fstream>
 
 #include "mysql.h"
 #include "mysqld_error.h"
