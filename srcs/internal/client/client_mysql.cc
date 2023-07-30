@@ -8,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <ofstream>
 
 #include "mysql.h"
 #include "mysqld_error.h"
@@ -160,7 +161,9 @@ ExecutionStatus MySQLClient::clean_up_connection(MYSQL &mm) {
 }
 
 ExecutionStatus MySQLClient::error_status(MYSQL &mm) {
+  std::ofstream message("/tmp/error_message.txt", std::ios::out);
   int res = mysql_errno(&mm);
+  message << "Error Code " << res << ", " << mysql_error(&mm) << std::endl;
   if (is_crash_response(res)) return kServerCrash;
   if (res == ER_PARSE_ERROR || res == ER_SYNTAX_ERROR) return kSyntaxError;
   return kSemanticError;
