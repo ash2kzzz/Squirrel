@@ -12,8 +12,6 @@
 #include "client.h"
 #include "yaml-cpp/yaml.h"
 
-#define MAX_TEST_NUM 5000
-
 int main(int argc, char **argv) {
   YAML::Node config = YAML::LoadFile(std::string(argv[1]));
 
@@ -31,7 +29,7 @@ int main(int argc, char **argv) {
   auto *mutator = create_database(config);
   auto *sq = new SquirrelMutator(mutator);
   std::string input_path("/root/ob_input");
-  int test_num;
+  int test_num = 0;
   std::map<client::ExecutionStatus, int> cal;
   cal[client::kConnectFailed] = 0;
   cal[client::kExecuteError] = 0;
@@ -43,24 +41,21 @@ int main(int argc, char **argv) {
   std::vector<std::string> file_list =
       get_all_files_in_dir(input_path.c_str());
   for (auto &f : file_list) {
+    std::string line;
     auto file_path = input_path + "/" + f;
     std::ifstream input_file(file_path);
-    std::string input((std::istreambuf_iterator<char>(input_file)),
-                 std::istreambuf_iterator<char>());
-    replace(input.begin(), input.end(), '\n', ' ');
-    sq->database->mutate(input);
-    if (sq->database->validated_test_cases_num() >= MAX_TEST_NUM)
-      break;
-  }
-  test_num = sq->database->validated_test_cases_num();
-
-  while (sq->database->has_mutated_test_cases()) {
-    sq->current_input = sq->database->get_next_mutated_query();
-    const char *query = sq->current_input.c_str();
-    test_client->prepare_env();
-    client::ExecutionStatus result = test_client->execute(query, strlen(query));
-    cal[result]++;
-    test_client->clean_up_env();
+    while (std::getline(input_file, line)) {
+      if (line.empty()) continue;
+      test_num += (int)sq->database->mutate(input);
+    }
+    while (sq->database->has_mutated_test_cases()) {
+      sq->current_input = sq->database->get_next_mutated_query();
+      const char *query = sq->current_input.c_str();
+      test_client->prepare_env();
+      client::ExecutionStatus result = test_client->execute(query, strlen(query));
+      cal[result]++;
+      test_client->clean_up_env();
+    }
   }
 
   std::cout << "test num:" << test_num << "\n";
