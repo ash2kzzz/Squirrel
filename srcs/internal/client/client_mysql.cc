@@ -53,6 +53,9 @@ ExecutionStatus MySQLClient::execute(const char *query, size_t size) {
     std::cerr << "Cannot mySQL_QUERY " << std::endl;
     return kServerCrash;
   }
+  else if (server_response) {
+    return error_status(*connection);
+  }
   ExecutionStatus server_status = clean_up_connection(*connection);
   mysql_close(&(*connection));
   return server_status;
@@ -138,20 +141,28 @@ ExecutionStatus MySQLClient::clean_up_connection(MYSQL &mm) {
   } while ((res = mysql_next_result(&mm)) == 0);
 
   if (res != -1) {
-    res = mysql_errno(&mm);
-    if (is_crash_response(res)) {
-      // std::cerr << "Found a crash!" << std::endl;
-      return kServerCrash;
-    }
-    if (res == ER_PARSE_ERROR) {
-      // std::cerr << "Syntax error" << std::endl;
-      return kSyntaxError;
-    } else {
-      // std::cerr << "Semantic error" << std::endl;
-      return kSemanticError;
-    }
+    // res = mysql_errno(&mm);
+    // if (is_crash_response(res)) {
+    //   // std::cerr << "Found a crash!" << std::endl;
+    //   return kServerCrash;
+    // }
+    // if (res == ER_PARSE_ERROR) {
+    //   // std::cerr << "Syntax error" << std::endl;
+    //   return kSyntaxError;
+    // } else {
+    //   // std::cerr << "Semantic error" << std::endl;
+    //   return kSemanticError;
+    // }
+    return error_status(mm);
   }
   // std::cerr << "Normal" << std::endl;
   return kNormal;
+}
+
+ExecutionStatus MySQLClient::error_status(MYSQL &mm) {
+  int res = mysql_errno(&mm);
+  if (is_crash_response(res)) return kServerCrash;
+  if (res == ER_PARSE_ERROR) return kSyntaxError;
+  return kSemanticError;
 }
 };  // namespace client
