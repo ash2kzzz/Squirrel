@@ -1279,9 +1279,9 @@ vector<IR *> Mutator::mutate2(IR *input) {
   */
   vector<IR *> res;
 
-  // if (!lucky_enough_to_be_mutated(input->mutated_times_)) {
-  //   return res;
-  // }
+  if (!lucky_enough_to_be_mutated(input->mutated_times_)) {
+    return res;
+  }
 
   // All nodes are replaced
   vector<IR *> tmp_vec = strategy_replace_left(input);
@@ -4867,11 +4867,11 @@ vector<IR *> Mutator::mutate2(IR *input) {
       break;
   }
 
-  // input->mutated_times_ += res.size();
-  // for (auto i : res) {
-  //   if (i == NULL) continue;
-  //   i->mutated_times_ = input->mutated_times_;
-  // }
+  input->mutated_times_ += res.size();
+  for (auto i : res) {
+    if (i == NULL) continue;
+    i->mutated_times_ = input->mutated_times_;
+  }
   return res;
 }
 
