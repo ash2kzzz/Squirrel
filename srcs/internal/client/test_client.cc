@@ -42,11 +42,10 @@ int main(int argc, char **argv) {
   cal[client::kSemanticError] = 0;
   while (std::getline(input, line)) {
     sq->database->mutate(line);
-    if (sq->database->validated_test_cases_num() >= TEST_NUM) {
-      test_num = sq->database->validated_test_cases_num();
+    if (sq->database->validated_test_cases_num() >= TEST_NUM)
       break;
-    }
   }
+  test_num = sq->database->validated_test_cases_num();
 
   while (sq->database->has_mutated_test_cases()) {
     sq->current_input = sq->database->get_next_mutated_query();

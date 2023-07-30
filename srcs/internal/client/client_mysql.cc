@@ -127,6 +127,14 @@ ExecutionStatus MySQLClient::clean_up_connection(MYSQL &mm) {
   do {
     auto q_result = mysql_store_result(&mm);
     if (q_result) mysql_free_result(q_result);
+    else {
+      if (mysql_field_count(&mm) != 0) {
+        fprintf(stderr, "Execute error %d, %s\n", mysql_errno(&mm),
+                mysql_error(&mm));
+        res = 0;
+        break;
+      }
+    }
   } while ((res = mysql_next_result(&mm)) == 0);
 
   if (res != -1) {
