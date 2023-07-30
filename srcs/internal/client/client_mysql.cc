@@ -161,7 +161,7 @@ ExecutionStatus MySQLClient::clean_up_connection(MYSQL &mm) {
 }
 
 ExecutionStatus MySQLClient::error_status(MYSQL &mm) {
-  std::ofstream message("/tmp/error_message.txt", std::ios::out);
+  static std::ofstream message("/tmp/error_message.txt", std::ios::out);
   int res = mysql_errno(&mm);
   message << "Error Code " << res << ", " << mysql_error(&mm) << std::endl;
   if (is_crash_response(res)) return kServerCrash;
