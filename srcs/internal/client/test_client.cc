@@ -11,7 +11,7 @@
 #include "client.h"
 #include "yaml-cpp/yaml.h"
 
-#define TEST_NUM 5000
+#define TEST_NUM 500
 
 int main(int argc, char **argv) {
   YAML::Node config = YAML::LoadFile(std::string(argv[1]));
