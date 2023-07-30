@@ -162,7 +162,7 @@ ExecutionStatus MySQLClient::clean_up_connection(MYSQL &mm) {
 ExecutionStatus MySQLClient::error_status(MYSQL &mm) {
   int res = mysql_errno(&mm);
   if (is_crash_response(res)) return kServerCrash;
-  if (res == ER_PARSE_ERROR) return kSyntaxError;
+  if (res == ER_PARSE_ERROR || res == ER_SYNTAX_ERROR) return kSyntaxError;
   return kSemanticError;
 }
 };  // namespace client

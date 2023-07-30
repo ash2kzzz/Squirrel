@@ -53,10 +53,10 @@ int main(int argc, char **argv) {
     test_num += sq->database->validated_test_cases_num();
     while (sq->database->has_mutated_test_cases()) {
       sq->current_input = sq->database->get_next_mutated_query();
-      use_input.push(sq->current_input);
       const char *query = sq->current_input.c_str();
       test_client->prepare_env();
       client::ExecutionStatus result = test_client->execute(query, strlen(query));
+      if (result == client::kNormal) use_input.push(sq->current_input);
       cal[result]++;
       test_client->clean_up_env();
     }
@@ -68,10 +68,10 @@ int main(int argc, char **argv) {
     test_num += sq->database->validated_test_cases_num();
     while (sq->database->has_mutated_test_cases()) {
       sq->current_input = sq->database->get_next_mutated_query();
-      use_input.push(sq->current_input);
       const char *query = sq->current_input.c_str();
       test_client->prepare_env();
       client::ExecutionStatus result = test_client->execute(query, strlen(query));
+      if (result == client::kNormal) use_input.push(sq->current_input);
       cal[result]++;
       test_client->clean_up_env();
     }
