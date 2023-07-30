@@ -4,8 +4,11 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <streambuf>
+#include <algorithm>
 
 #include "db.h"
+#include "utils.h"
 #include "client.h"
 #include "yaml-cpp/yaml.h"
 
@@ -27,9 +30,7 @@ int main(int argc, char **argv) {
   */
   auto *mutator = create_database(config);
   auto *sq = new SquirrelMutator(mutator);
-  std::string input_path = "/root/Squirrel/data/all_ir";
-  std::ifstream input(input_path);
-  std::string line;
+  std::string input_path("/root/ob_input");
   int test_num;
   std::map<client::ExecutionStatus, int> cal;
   cal[client::kConnectFailed] = 0;
@@ -39,8 +40,15 @@ int main(int argc, char **argv) {
   cal[client::kTimeout] = 0;
   cal[client::kSyntaxError] = 0;
   cal[client::kSemanticError] = 0;
-  while (std::getline(input, line)) {
-    sq->database->mutate(line);
+  std::vector<std::string> file_list =
+      get_all_files_in_dir(input_path.c_str());
+  for (auto &f : file_list) {
+    auto file_path = input_path + "/" + f;
+    std::ifstream input_file(file_path);
+    std::string input((std::istreambuf_iterator<char>(input_file)),
+                 std::istreambuf_iterator<char>());
+    replace(input.begin(), input.end(), '\n', '');
+    sq->database->mutate(input);
     if (sq->database->validated_test_cases_num() >= TEST_NUM)
       break;
   }
