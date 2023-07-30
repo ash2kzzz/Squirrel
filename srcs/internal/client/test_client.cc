@@ -12,7 +12,7 @@
 #include "client.h"
 #include "yaml-cpp/yaml.h"
 
-#define TEST_NUM 5000
+#define MAX_TEST_NUM 5000
 
 int main(int argc, char **argv) {
   YAML::Node config = YAML::LoadFile(std::string(argv[1]));
@@ -47,9 +47,9 @@ int main(int argc, char **argv) {
     std::ifstream input_file(file_path);
     std::string input((std::istreambuf_iterator<char>(input_file)),
                  std::istreambuf_iterator<char>());
-    replace(input.begin(), input.end(), '\n', '');
+    replace(input.begin(), input.end(), '\n', ' ');
     sq->database->mutate(input);
-    if (sq->database->validated_test_cases_num() >= TEST_NUM)
+    if (sq->database->validated_test_cases_num() >= MAX_TEST_NUM)
       break;
   }
   test_num = sq->database->validated_test_cases_num();
