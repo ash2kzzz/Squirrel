@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     std::ifstream input_file(file_path);
     while (std::getline(input_file, line)) {
       if (line.empty()) continue;
-      test_num += (int)sq->database->mutate(input);
+      test_num += (int)sq->database->mutate(line);
     }
     while (sq->database->has_mutated_test_cases()) {
       sq->current_input = sq->database->get_next_mutated_query();
