@@ -4,13 +4,14 @@
 #include <string>
 #include <fstream>
 #include <map>
-#include <streambuf>
-#include <algorithm>
+#include <queue>
 
 #include "db.h"
 #include "utils.h"
 #include "client.h"
 #include "yaml-cpp/yaml.h"
+
+#define TEST_NUM 5000
 
 int main(int argc, char **argv) {
   YAML::Node config = YAML::LoadFile(std::string(argv[1]));
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
   auto *mutator = create_database(config);
   auto *sq = new SquirrelMutator(mutator);
   std::string input_path("/root/ob_input");
+  std::queue<std::string> use_input;
   int test_num = 0;
   std::map<client::ExecutionStatus, int> cal;
   cal[client::kConnectFailed] = 0;
@@ -51,6 +53,22 @@ int main(int argc, char **argv) {
     test_num += sq->database->validated_test_cases_num();
     while (sq->database->has_mutated_test_cases()) {
       sq->current_input = sq->database->get_next_mutated_query();
+      use_input.push(sq->current_input);
+      const char *query = sq->current_input.c_str();
+      test_client->prepare_env();
+      client::ExecutionStatus result = test_client->execute(query, strlen(query));
+      cal[result]++;
+      test_client->clean_up_env();
+    }
+  }
+  while (!use_input.empty() && test_num < TEST_NUM) {
+    std::string line = use_input.front();
+    use_input.pop();
+    sq->database->mutate(line);
+    test_num += sq->database->validated_test_cases_num();
+    while (sq->database->has_mutated_test_cases()) {
+      sq->current_input = sq->database->get_next_mutated_query();
+      use_input.push(sq->current_input);
       const char *query = sq->current_input.c_str();
       test_client->prepare_env();
       client::ExecutionStatus result = test_client->execute(query, strlen(query));
