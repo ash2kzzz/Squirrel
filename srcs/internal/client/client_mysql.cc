@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <string>
 #include <deque>
 #include <iostream>
 #include <optional>
@@ -12,6 +13,8 @@
 
 #include "mysql.h"
 #include "mysqld_error.h"
+
+static std::string error_query;
 
 using namespace std;
 namespace {
@@ -50,6 +53,8 @@ ExecutionStatus MySQLClient::execute(const char *query, size_t size) {
   }
 
   int server_response = mysql_real_query(&(*connection), query, size);
+  std::string str_query(query, size);
+  error_query = str_query;
   if (is_crash_response(server_response)) {
     std::cerr << "Cannot mySQL_QUERY " << std::endl;
     return kServerCrash;
@@ -163,7 +168,8 @@ ExecutionStatus MySQLClient::clean_up_connection(MYSQL &mm) {
 ExecutionStatus MySQLClient::error_status(MYSQL &mm) {
   static std::ofstream message("/tmp/error_message.txt", std::ios::out);
   int res = mysql_errno(&mm);
-  message << "Error Code " << res << ", " << mysql_error(&mm) << std::endl;
+  message << "SQL statement: " << error_query << std::endl;
+  message << "Error Code " << res << ", " << mysql_error(&mm) << std::endl << std::endl;
   if (is_crash_response(res)) return kServerCrash;
   if (res == ER_PARSE_ERROR || res == ER_SYNTAX_ERROR) return kSyntaxError;
   return kSemanticError;
