@@ -46,8 +46,9 @@ int main(int argc, char **argv) {
     std::ifstream input_file(file_path);
     while (std::getline(input_file, line)) {
       if (line.empty()) continue;
-      test_num += (int)sq->database->mutate(line);
+      sq->database->mutate(line);
     }
+    test_num += sq->database->validated_test_cases_num();
     while (sq->database->has_mutated_test_cases()) {
       sq->current_input = sq->database->get_next_mutated_query();
       const char *query = sq->current_input.c_str();
