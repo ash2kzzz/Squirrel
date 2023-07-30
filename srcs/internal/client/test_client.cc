@@ -15,7 +15,6 @@ int main(int argc, char **argv) {
   YAML::Node config = YAML::LoadFile(std::string(argv[1]));
 
   std::string db_name = config["db"].as<std::string>();
-  std::string mysql_init_lib = config["init_lib"].as<std::string>();
   // client::PostgreSQLClient *test_client = new client::PostgreSQLClient;
   client::DBClient *test_client = client::create_client(db_name, config);
   test_client->initialize(config);
@@ -28,7 +27,7 @@ int main(int argc, char **argv) {
   */
   auto *mutator = create_database(config);
   auto *sq = new SquirrelMutator(mutator);
-  std::string input_path = mysql_init_lib + "/all_ir";
+  std::string input_path = "/root/Squirrel/data/all_ir";
   std::ifstream input(input_path);
   std::string line;
   int test_num;
