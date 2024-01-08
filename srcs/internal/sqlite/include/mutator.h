@@ -22,6 +22,7 @@ class Mutator {
   vector<IR *> mutate_all(vector<IR *> &v_ir_collector);
 
   vector<IR *> mutate(IR *input);
+  vector<IR *> mutate2(IR *input);
   IR *strategy_delete(IR *cur);
   IR *strategy_insert(IR *cur);
   IR *strategy_replace(IR *cur);
@@ -35,8 +36,11 @@ class Mutator {
 
   void add_to_library(IR *);
   void add_to_library_core(IR *);
+  void add_to_library_no_traverse(IR *);
+  void add_to_library_core_no_traverse(IR *);
   IR *get_from_libary_3D(IR *);
   IR *get_from_libary_2D(IR *);
+  IR *get_from_libary_2D_type(IRTYPE type);
 
   void init(string f_testcase, string f_common_string = "", string pragma = "");
   string fix(IR *root);
@@ -90,6 +94,10 @@ class Mutator {
   string s_table_name;
 
   map<NODETYPE, int> type_counter_;
+
+  set<IRTYPE> identifier_type;
+  set<IRTYPE> single_grammar_expression;
+  set<IRTYPE> list_type;
 };
 
 #endif
