@@ -262,10 +262,12 @@ IR *SelectStatement::translate(vector<IR *> &v_ir_collector) {
   PUSH(res);
   res = new IR(kUnknown, OP0(), res, tmp4);
   PUSH(res);
-  res = new IR(kUnknown, OP0(), res, tmp5);
   if (opt_limit_ != NULL) {
+    res = new IR(kUnknown, OP0(), res, tmp5);
     PUSH(res);
     res = new IR(kSelectStatement, OP0(), res, tmp6);
+  } else {
+    res = new IR(kSelectStatement, OP0(), res, tmp5);
   }
   CASEEND
   SWITCHEND
@@ -337,7 +339,7 @@ IR *CreateStatement::translate(vector<IR *> &v_ir_collector) {
   res = new IR(kUnknown, OPMID("ON"), res, tmp4);
   PUSH(res);
   auto tmp5 = SAFETRANSLATE(ident_commalist_);
-  res = new IR(kCreateStatement, OP3("", "(", ")"), res, tmp5);
+  res = new IR(kUnknown, OP3("", "(", ")"), res, tmp5);
   PUSH(res);
   auto tmp6 = SAFETRANSLATE(opt_where_);
   res = new IR(kCreateStatement, OP0(), res, tmp6);
@@ -624,11 +626,13 @@ IR *SelectNoParen::translate(vector<IR *> &v_ir_collector) {
   CASESTART(0)
   res = SAFETRANSLATE(select_clause_);
   auto tmp = SAFETRANSLATE(opt_order_);
-  res = new IR(kSelectNoParen, OP0(), res, tmp);
 
   if (opt_limit_ != NULL) {
+    res = new IR(kUnknown, OP0(), res, tmp);
     PUSH(res);
     tmp = SAFETRANSLATE(opt_limit_);
+    res = new IR(kSelectNoParen, OP0(), res, tmp);
+  } else {
     res = new IR(kSelectNoParen, OP0(), res, tmp);
   }
   CASEEND
@@ -639,15 +643,17 @@ IR *SelectNoParen::translate(vector<IR *> &v_ir_collector) {
   PUSH(res);
 
   tmp = SAFETRANSLATE(select_paren_or_clause_);
-  res = new IR(kSelectNoParen, OP0(), res, tmp);
+  res = new IR(kUnknown, OP0(), res, tmp);
   PUSH(res);
 
   tmp = SAFETRANSLATE(opt_order_);
-  res = new IR(kSelectNoParen, OP0(), res, tmp);
 
   if (opt_limit_ != NULL) {
+    res = new IR(kUnknown, OP0(), res, tmp);
     PUSH(res);
     tmp = SAFETRANSLATE(opt_limit_);
+    res = new IR(kSelectNoParen, OP0(), res, tmp);
+  } else {
     res = new IR(kSelectNoParen, OP0(), res, tmp);
   }
   CASEEND
@@ -700,11 +706,13 @@ IR *SelectClause::translate(vector<IR *> &v_ir_collector) {
   PUSH(res);
   res = new IR(kUnknown, OP0(), res, tmp5);
   PUSH(res);
-  res = new IR(kSelectClause, OP0(), res, tmp6);
   if (sub_type_ == 1) {
+    res = new IR(kUnknown, OP0(), res, tmp6);
     PUSH(res);
     auto tmp = SAFETRANSLATE(window_clause_);
     res = new IR(kSelectClause, OP0(), res, tmp);
+  } else {
+    res = new IR(kSelectClause, OP0(), res, tmp6);
   }
   TRANSLATEEND
 }
@@ -997,7 +1005,7 @@ IR *ExistsExpr::translate(vector<IR *> &v_ir_collector) {
   res = SAFETRANSLATE(select_no_paren_);
   res = new IR(kUnknown, OP2("(", ")"), res);
   PUSH(res);
-  res = new IR(kExistsExpr, OP1("EXISTS"), res);
+  res = new IR(kExistsExpr, OP1("NOT EXISTS"), res);
   CASEEND
   SWITCHEND
 
@@ -1151,10 +1159,10 @@ IR *FunctionExpr::translate(vector<IR *> &v_ir_collector) {
   SWITCHSTART
   CASESTART(0)
   res = SAFETRANSLATE(id_);
-  res = new IR(kFunctionExpr, OPEND("()"), res);
+  res = new IR(kUnknown, OPEND("()"), res);
   PUSH(res);
   auto tmp1 = SAFETRANSLATE(opt_filter_clause_);
-  res = new IR(kFunctionExpr, OP0(), res, tmp1);
+  res = new IR(kUnknown, OP0(), res, tmp1);
   PUSH(res);
   tmp1 = SAFETRANSLATE(opt_over_clause_);
   res = new IR(kFunctionExpr, OP0(), res, tmp1);
@@ -1164,12 +1172,12 @@ IR *FunctionExpr::translate(vector<IR *> &v_ir_collector) {
   auto tmp = SAFETRANSLATE(opt_distinct_);
   auto tmp2 = SAFETRANSLATE(expr_list_);
 
-  auto tmp_res = new IR(kExprList, OP3("(", "", ")"), tmp, tmp2);
+  auto tmp_res = new IR(kUnknown, OP3("(", "", ")"), tmp, tmp2);
   PUSH(tmp_res);
-  res = new IR(kFunctionExpr, OP0(), res, tmp_res);
+  res = new IR(kUnknown, OP0(), res, tmp_res);
   PUSH(res);
   auto tmp1 = SAFETRANSLATE(opt_filter_clause_);
-  res = new IR(kFunctionExpr, OP0(), res, tmp1);
+  res = new IR(kUnknown, OP0(), res, tmp1);
   PUSH(res);
   tmp1 = SAFETRANSLATE(opt_over_clause_);
   res = new IR(kFunctionExpr, OP0(), res, tmp1);
@@ -2211,6 +2219,8 @@ IR *CmdPragma::translate(vector<IR *> &v_ir_collector) {
   auto pv = SAFETRANSLATE(pragma_value_);
   res = new IR(kCmdPragma, OP3("PRAGMA", "(", ")"), pk, pv);
   CASEEND
+  // -----------------------------------------------------------
+  // maybe here is extra code
   CASESTART(3)
   res = new IR(kCmdPragma, string("REINDEX"));
   CASEEND
@@ -2225,6 +2235,7 @@ IR *CmdPragma::translate(vector<IR *> &v_ir_collector) {
   auto table_name = SAFETRANSLATE(table_name_);
   res = new IR(kCmdPragma, OPSTART("ANALYZE"), table_name);
   CASEEND
+  // -----------------------------------------------------------
   SWITCHEND
 
   TRANSLATEEND
@@ -2351,7 +2362,7 @@ IR *ColumnArg::translate(vector<IR *> &v_ir_collector) {
   CASESTART(2)
   auto tmp = SAFETRANSLATE(opt_order_type_);
   auto tmp1 = SAFETRANSLATE(opt_on_conflict_);
-  res = new IR(kColumnArg, OP1("PRIMARY KEY"), tmp, tmp1);
+  res = new IR(kUnknown, OP1("PRIMARY KEY"), tmp, tmp1);
   PUSH(res);
   tmp = SAFETRANSLATE(opt_autoinc_);
   res = new IR(kColumnArg, OP0(), res, tmp);
@@ -2905,19 +2916,19 @@ IR *TableRef::translate(vector<IR *> &v_ir_collector) {
   CASESTART(0)
   auto tmp1 = SAFETRANSLATE(table_prefix_);
   auto tmp2 = SAFETRANSLATE(table_name_);
-  res = new IR(kTableRef, OP0(), tmp1, tmp2);
+  res = new IR(kUnknown, OP0(), tmp1, tmp2);
   PUSH(res);
 
   auto tmp3 = SAFETRANSLATE(opt_alias_);
-  res = new IR(kTableRef, OP0(), res, tmp3);
+  res = new IR(kUnknown, OP0(), res, tmp3);
   PUSH(res);
 
   auto tmp4 = SAFETRANSLATE(opt_index_);
-  res = new IR(kTableRef, OP0(), res, tmp4);
+  res = new IR(kUnknown, OP0(), res, tmp4);
   PUSH(res);
 
   auto tmp5 = SAFETRANSLATE(opt_on_);
-  res = new IR(kTableRef, OP0(), res, tmp5);
+  res = new IR(kUnknown, OP0(), res, tmp5);
   PUSH(res);
 
   auto tmp6 = SAFETRANSLATE(opt_using_);
@@ -2930,15 +2941,15 @@ IR *TableRef::translate(vector<IR *> &v_ir_collector) {
   PUSH(res);
 
   auto tmp3 = SAFETRANSLATE(expr_list_);
-  res = new IR(kTableRef, OP0(), res, tmp3);
+  res = new IR(kUnknown, OP3("", "(", ")"), res, tmp3);
   PUSH(res);
 
   auto tmp4 = SAFETRANSLATE(opt_alias_);
-  res = new IR(kTableRef, OP0(), res, tmp4);
+  res = new IR(kUnknown, OP0(), res, tmp4);
   PUSH(res);
 
   auto tmp5 = SAFETRANSLATE(opt_on_);
-  res = new IR(kTableRef, OP0(), res, tmp5);
+  res = new IR(kUnknown, OP0(), res, tmp5);
   PUSH(res);
 
   auto tmp6 = SAFETRANSLATE(opt_using_);
@@ -2947,15 +2958,15 @@ IR *TableRef::translate(vector<IR *> &v_ir_collector) {
   CASESTART(2)
   auto tmp1 = SAFETRANSLATE(table_prefix_);
   auto tmp2 = SAFETRANSLATE(select_no_paren_);
-  res = new IR(kTableRef, OP0(), tmp1, tmp2);
+  res = new IR(kUnknown, OP3("", "(", ")"), tmp1, tmp2);
   PUSH(res);
 
   auto tmp3 = SAFETRANSLATE(opt_alias_);
-  res = new IR(kTableRef, OP0(), res, tmp3);
+  res = new IR(kUnknown, OP0(), res, tmp3);
   PUSH(res);
 
   auto tmp4 = SAFETRANSLATE(opt_on_);
-  res = new IR(kTableRef, OP0(), res, tmp4);
+  res = new IR(kUnknown, OP0(), res, tmp4);
   PUSH(res);
 
   auto tmp5 = SAFETRANSLATE(opt_using_);
@@ -2965,15 +2976,15 @@ IR *TableRef::translate(vector<IR *> &v_ir_collector) {
   CASESTART(3)
   auto tmp1 = SAFETRANSLATE(table_prefix_);
   auto tmp2 = SAFETRANSLATE(table_ref_);
-  res = new IR(kTableRef, OP0(), tmp1, tmp2);
+  res = new IR(kUnknown, OP3("", "(", ")"), tmp1, tmp2);
   PUSH(res);
 
   auto tmp3 = SAFETRANSLATE(opt_alias_);
-  res = new IR(kTableRef, OP0(), res, tmp3);
+  res = new IR(kUnknown, OP0(), res, tmp3);
   PUSH(res);
 
   auto tmp4 = SAFETRANSLATE(opt_on_);
-  res = new IR(kTableRef, OP0(), res, tmp4);
+  res = new IR(kUnknown, OP0(), res, tmp4);
   PUSH(res);
 
   auto tmp5 = SAFETRANSLATE(opt_using_);
@@ -3425,16 +3436,16 @@ IR *UpsertClause::translate(vector<IR *> &v_ir_collector) {
   CASESTART(2)
   auto tmp0 = SAFETRANSLATE(indexed_column_list_);
   auto tmp1 = SAFETRANSLATE(opt_where1_);
-  res = new IR(kUpsertClause, OP2("ON CONFLICT (", ")"), tmp0, tmp1);
+  res = new IR(kUpsertClause, OP3("ON CONFLICT (", ")", "DO NOTHING"), tmp0, tmp1);
   CASEEND
   CASESTART(3)
   auto tmp0 = SAFETRANSLATE(indexed_column_list_);
   auto tmp1 = SAFETRANSLATE(opt_where1_);
   auto tmp2 = SAFETRANSLATE(assign_list_);
   auto tmp3 = SAFETRANSLATE(opt_where2_);
-  res = new IR(kUpsertClause, OP2("ON CONFLICT (", ")"), tmp0, tmp1);
+  res = new IR(kUnknown, OP3("ON CONFLICT (", ")", "DO UPDATE SET"), tmp0, tmp1);
   PUSH(res);
-  res = new IR(kUpsertClause, OPMID("DO UPDATE SET"), res, tmp2);
+  res = new IR(kUnknown, OP0(), res, tmp2);
   PUSH(res);
   res = new IR(kUpsertClause, OP0(), res, tmp3);
   CASEEND
