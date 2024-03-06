@@ -20,7 +20,7 @@ RUN chmod +w /etc/sudoers && \
 USER dobigthing
 WORKDIR /home
 
-RUN git clone https://github.com/Dobigthing666/Squirrel.git && \
+RUN git clone -b ob-test https://github.com/ash2kzzz/Squirrel.git && \
     cd Squirrel && git submodule update --init && \
     cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -Wno-dev -DMYSQL=ON && \
     cmake --build build -j && \
@@ -44,5 +44,6 @@ RUN sudo chown dobigthing:dobigthing /usr/local/mysql/ -R && \
 #            --datadir=/usr/local/mysql/data --log-error=err_log.err \
 #            --pid-file=server_pid.pid --max_statement_time=1
 RUN AFL_DEBUG=1 __AFL_SHM_ID=1234 /usr/local/mysql/bin/mysqld 2>&1 | grep "__afl_map_size" | tail -n 1 | cut -d"," -f8 | cut -d" " -f 3 > /tmp/mapsize
-WORKDIR /home/Squirrel/scripts/utils
-ENTRYPOINT AFL_IGNORE_PROBLEMS=1 AFL_MAP_SIZE=$(cat /tmp/mapsize) python3 run.py mysql ../../data/fuzz_root/mysql_input/
+# WORKDIR /home/Squirrel/scripts/utils
+# ENTRYPOINT AFL_IGNORE_PROBLEMS=1 AFL_MAP_SIZE=$(cat /tmp/mapsize) python3 run.py mysql ../../data/fuzz_root/mysql_input/
+WORKDIR /home/Squirrel

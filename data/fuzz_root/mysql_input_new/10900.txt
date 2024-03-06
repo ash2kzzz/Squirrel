@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v2 INTEGER GENERATED ALWAYS AS( datetime ( v1 , v1 ) ) , v1 INT ) ; INSERT INTO v0 VALUES ( 0 ) ; SELECT CAST ( round ( 'MED P' , lower ( 'v1' ) ) AS INTEGER ) FROM v0 LIMIT 3 ; 

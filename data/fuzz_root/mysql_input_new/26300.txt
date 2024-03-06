@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 INTEGER CHECK( 10 ) ) ; PRAGMA temp_store=MEMORY; ; SELECT ( SELECT nth_value ( 'x' , 2 ) OVER( ORDER BY NULL ) GROUP BY julianday () ) GROUP BY 10.100000 ; 

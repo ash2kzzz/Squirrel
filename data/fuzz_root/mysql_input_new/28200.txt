@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 INTEGER PRIMARY KEY ) ; INSERT INTO v0 VALUES ( 2 ) ; SELECT v0 . v1 FROM v0 ( v1 = 2.100000 AND v1 = 3 ) AS b ON v0 . v1 = v0 . v1 WHERE v0 . v1 IN ( 1 , 2 , 2 ) ; 

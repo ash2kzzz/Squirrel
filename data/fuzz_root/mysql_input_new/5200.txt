@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 VARCHAR(80) PRIMARY KEY , v2 CHECK( '17' = v2 NOT LIKE v1 NOT LIKE max ( v1 , max ( v2 , v2 ) ) ) ) ; INSERT INTO v0 ( v2 ) VALUES ( 3 ) ,( 1 ) ,( 0 ) ; CREATE INDEX v3 ON v0 ( v2 , v2 , v2 , v2 , v2 , v2 , v2 , v2 ) ; BEGIN EXCLUSIVE ; SELECT v1 , v1 FROM v0 WHERE v2 = 10 AND v1 IN ( 1 , 10 , 2 ) ORDER BY v1 DESC NULLS LAST , v1 DESC ; 

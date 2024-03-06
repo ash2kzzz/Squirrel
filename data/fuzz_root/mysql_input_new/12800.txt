@@ -1,0 +1,1 @@
+CREATE VIEW v0 ( v1 ) AS SELECT 'v1' AS p GROUP BY 'v0' , '18' ; SELECT DISTINCT * FROM v0 AS l , v0 AS r , v0 , v0 AS c NATURAL JOIN v0 ; SELECT * , '18' FROM v0 WHERE v1 = 10 AND ( v1 = v1 OR v1 = v1 ) ; SELECT * FROM v0 WHERE v0 . v1 = NULL OR v1 = NOT min ( v1 , v1 ) ORDER BY v1 NULLS LAST ; SELECT * FROM v0 , v0 WHERE max ( v1 , v1 ) > 10 ; 

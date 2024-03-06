@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 TEXT ) ; INSERT INTO v0 ( v1 , v1 ) VALUES ( 'GERMANY' , 10 ) ; CREATE VIEW v2 AS SELECT 'SM CASE' , datetime ( 10 , v1 , NULL , 10 , v1 ) AS PROMO_REVENUE FROM v0 AS myname ; CREATE VIEW v4 AS SELECT * FROM v2 AS c LEFT JOIN v0 ON 'v1' = zeroblob ( 10 ) LEFT JOIN v2 ; SELECT * FROM v0 , v4 , v4 AS x , v2 AS VALUE JOIN v2 ; 

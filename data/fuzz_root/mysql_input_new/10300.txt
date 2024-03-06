@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 TEXT ) ; INSERT INTO v0 VALUES ( 'bbbbbbbbaaaaaaaaaaaaaaaaaaaabbbbbbbbaaaaaaaaaaaaaaaaaaaa' ) ,( 'v0' ) ,( 'c' ) ; CREATE TABLE v2 ( v3 , v4 ) ; INSERT INTO v0 SELECT zipfile ( 0 , v0 . v1 ) FROM v0 ; SELECT quote ( v1 ) , quote ( v1 ) , 'x' FROM v0 ; 

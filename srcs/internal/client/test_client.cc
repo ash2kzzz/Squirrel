@@ -11,7 +11,7 @@
 #include "client.h"
 #include "yaml-cpp/yaml.h"
 
-#define TEST_NUM 500
+#define TEST_NUM 5000
 
 int main(int argc, char **argv) {
   YAML::Node config = YAML::LoadFile(std::string(argv[1]));
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   */
   auto *mutator = create_database(config);
   auto *sq = new SquirrelMutator(mutator);
-  std::string input_path("/root/ob_input");
+  std::string input_path("/home/Squirrel/data/fuzz_root/mysql_input");
   std::queue<std::string> use_input;
   int test_num = 0;
   std::map<client::ExecutionStatus, int> cal;

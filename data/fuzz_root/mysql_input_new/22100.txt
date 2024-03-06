@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 , v3 AS( zipfile ( v3 ) OVER generate_series > 9223372036854775807 + v3 ) , v2 AS( v1 ) CHECK( v1 ) ) ; UPDATE v0 SET v2 = NULL 

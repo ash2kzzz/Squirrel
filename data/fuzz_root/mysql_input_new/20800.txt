@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 TEXT CHECK( v1 = zeroblob ( NOT v1 = zeroblob ( NOT zeroblob ( NOT v1 = '' ) = v1 ) ) NOT LIKE 'x' ) ) ; INSERT INTO v0 VALUES ( 3 ) ; INSERT INTO v0 SELECT zeroblob ( DISTINCT 1.100000 + NULL ) FROM v0 ; SELECT instr ( v1 + 10 , zeroblob ( changes () ) ) FROM v0 ; 

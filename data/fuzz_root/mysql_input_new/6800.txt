@@ -1,0 +1,1 @@
+SELECT last_insert_rowid () ORDER BY ( NULL ) ,( NULL ) ,( 3 ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ,( 10 ) ,( NULL ) ,( NULL ) ,( NULL ) ,( NULL ) ; SELECT v3 FROM v2 UNION SELECT v7 + 1 FROM v6 LIMIT 1 OFFSET 10 ; DROP TABLE v8 ; ALTER TABLE t2 RENAME TO t3 ; 

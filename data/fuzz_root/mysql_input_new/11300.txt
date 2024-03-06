@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v5 , v4 , v1 VARCHAR(1) , v3 , v2 VARCHAR(1) ) ; INSERT INTO v0 ( v3 , v2 ) VALUES ( 2 , 10 ) ; CREATE VIEW v6 AS SELECT v10 , v11 , v12 , v13 , 10 = v14 FROM v6 WHERE v15 = v16 ; SELECT ieee754 ( changes () ) IS NULL AS REVENUE ; 

@@ -1,0 +1,1 @@
+CREATE TABLE v0 ( v1 CHAR(30) , v2 CHAR(20) , v3 INTEGER ) ; INSERT INTO v0 ( v2 ) VALUES ( 10 ) ,( 9223372036854775807 ) ,( 10 ) ; CREATE UNIQUE INDEX v4 ON v0 ( v2 , v3 , v1 ) WHERE abs ( v3 ) IS NULL OR v3 <= lower ( v3 ) ; INSERT INTO v0 ( v3 ) VALUES ( 10 ) ,( 1 ) ; SELECT * FROM v4 , v0 WHERE v3 = v1 AND v2 = 2 ; 
